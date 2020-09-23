@@ -12,14 +12,13 @@
 ################################################################################
 
 
-import pyotp
 import argparse
 import csv
-import datetime
-import os
-import time
-import sys
 import curses
+import datetime
+import pyotp
+import sys
+import time
 
 
 def main():

@@ -20,6 +20,7 @@ import os
 import time
 import signal
 import sys
+import curses
 
 
 def main():
@@ -36,27 +37,40 @@ def main():
 
 def show_tokens(input):
 	try:
+		curses.noecho()
+		curses.cbreak()
+
 		while(True):
-			clear_screen()
 			print_list(input)
 			time.sleep(1)
 	except KeyboardInterrupt:
 		sys.exit(1)
+	finally:
+		curses.echo()
+		curses.nocbreak()
+		curses.endwin()
 
 
 def print_list(input):
+	line = 0
+
 	for file in input:
 		with open(file, 'r') as list:
 			fieldnames = ['username', 'password', 'totp', 'timer']
 			linereader = csv.DictReader(list, dialect='excel')
 
-			print_line()
-			print_row(*fieldnames)
-			print_line()
+			stdscr.addstr(line, 0, print_line())
+			stdscr.addstr(line+1, 0, print_row(*fieldnames))
+			stdscr.addstr(line+2, 0, print_line())
+			line+=3
 
 			for row in linereader:
 				totp = pyotp.TOTP(row['totp'])
-				print_row(row['username'], row['password'], totp.now(), calc_timer(totp))
+				text = print_row(row['username'], row['password'], totp.now(), calc_timer(totp))
+				stdscr.addstr(line, 0, text)
+				line+=1
+
+	stdscr.refresh()
 
 
 def clear_screen():
@@ -69,11 +83,11 @@ def calc_timer(totp):
 
 
 def print_row(uname, pw, totp, timer):
-	print("{:<25} | {:<33} | {:^8} | {:^5}".format(uname, pw, totp, timer))
+	return "{:<25} | {:<33} | {:^8} | {:^5}".format(uname, pw, totp, timer)
 
 
 def print_line():
-	print_row("-"*25, "-"*33, "-"*8, "-"*5)
+	return print_row("-"*25, "-"*33, "-"*8, "-"*5)
 
 
 def exit_gracefully(signum, frame):
@@ -82,4 +96,5 @@ def exit_gracefully(signum, frame):
 
 
 if __name__ == "__main__":
+	stdscr = curses.initscr()
 	main()

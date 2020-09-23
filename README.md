@@ -11,6 +11,11 @@ Create one or more CSV files containing the credentials
 |----------|----------|------------|
 |foobar    | Pa$$w0rd | TOTPsecret |
 
+```csv
+username,password,totp
+foobar,Pa$$w0rd,TOTPsecret
+```
+
 Execute the script:
 
 ```bash

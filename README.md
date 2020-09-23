@@ -25,7 +25,6 @@ chmod u+x TOTPviewer.py
 
 Copy/paste credentials into the login form
 
-------------------------- | --------------------------------- | -------- | -----
 username                  | password                          |   totp   | timer
 ------------------------- | --------------------------------- | -------- | -----
 foobar                    | Pa$$w0rd                          |  836015  |  10  

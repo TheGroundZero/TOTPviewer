@@ -18,7 +18,6 @@ import csv
 import datetime
 import os
 import time
-import signal
 import sys
 import curses
 
@@ -59,22 +58,13 @@ def print_list(input):
 			fieldnames = ['username', 'password', 'totp', 'timer']
 			linereader = csv.DictReader(list, dialect='excel')
 
-			stdscr.addstr(line, 0, print_line())
-			stdscr.addstr(line+1, 0, print_row(*fieldnames))
-			stdscr.addstr(line+2, 0, print_line())
-			line+=3
+			line = print_header(line, fieldnames)
 
 			for row in linereader:
 				totp = pyotp.TOTP(row['totp'])
-				text = print_row(row['username'], row['password'], totp.now(), calc_timer(totp))
-				stdscr.addstr(line, 0, text)
-				line+=1
+				line = print_row(line, row['username'], row['password'], totp.now(), calc_timer(totp))
 
 	stdscr.refresh()
-
-
-def clear_screen():
-	os.system('cls' if os.name=='nt' else 'clear')
 
 
 def calc_timer(totp):
@@ -82,17 +72,20 @@ def calc_timer(totp):
 	return time_remaining
 
 
-def print_row(uname, pw, totp, timer):
-	return "{:<25} | {:<33} | {:^8} | {:^5}".format(uname, pw, totp, timer)
+def print_header(line, fieldnames):
+	print_line(line)
+	print_row(line+1, *fieldnames)
+	print_line(line+2)
+	return line+3
 
 
-def print_line():
-	return print_row("-"*25, "-"*33, "-"*8, "-"*5)
+def print_row(line, uname, pw, totp, timer):
+	stdscr.addstr(line, 0, "{:<25} | {:<33} | {:^8} | {:^5}".format(uname, pw, totp, timer))
+	return line+1
 
 
-def exit_gracefully(signum, frame):
-	signal.signal(signal.SIGINT, original_sigint)
-	keep_running = False
+def print_line(line):
+	return print_row(line, "-"*25, "-"*33, "-"*8, "-"*5)
 
 
 if __name__ == "__main__":

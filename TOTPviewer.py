@@ -3,9 +3,10 @@
 ################################################################################
 ##                                                                            ##
 ## TOTP Viewer                                                                ##
-## Display credentials and TOTP tokens of multiple accounts                   ##
+## Display credentials and TOTP tokens of one ore more accounts               ##
 ##                                                                            ##
 ## Credentials en TOTP secret are loaded from one or more CSV files           ##
+##   or processed from parameters                                             ##
 ##                                                                            ##
 ## (c) 2020 TheGroundZero / @DezeStijn                                        ##
 ##                                                                            ##

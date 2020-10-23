@@ -21,20 +21,68 @@ import sys
 import time
 
 
+stdscr = None
+
+
 def main():
 	parser = argparse.ArgumentParser(
 		prog="TOTPcodes",
 		description="Display TOTP tokens for multiple accounts",
 	)
-	parser.add_argument("-i", "--input", dest="input_files", help="Input CSV file(s) with TOTP tokens", required=True, nargs='+')
+	subparsers = parser.add_subparsers(help="sub-command help")
+
+	parser_files = subparsers.add_parser("files", help="files help")
+	parser_files.add_argument("-i", "--input", dest="input_files", help="Input CSV file(s) with TOTP tokens", required=True, nargs='+')
+	parser_files.set_defaults(func=do_files)
+
+	parser_single = subparsers.add_parser("single", help="single help")
+	parser_single.add_argument("-u", "--user", dest="user", help="Username", required=False, default="", nargs='?')
+	parser_single.add_argument("-p", "--pass", dest="password", help="Password", required=False, default="", nargs='?')
+	parser_single.add_argument("-t", "--totp", dest="totp", help="TOTP", required=True, default="", nargs='?')
+	parser_single.set_defaults(func=do_single)
+
+	parser_show = subparsers.add_parser("show", help="show help")
+	parser_show.add_argument("-t", "--totp", dest="totp", help="TOTP", required=True, default="", nargs='?')
+	parser_show.set_defaults(func=do_show)
 
 	args = parser.parse_args()
+	args.func(args)
 
-	show_tokens(args.input_files)
+
+def do_files(args):
+	data = parse_files(args.input_files)
+	show_tokens(data)
+
+
+def do_single(args):
+	data = parse_params(args.user, args.password, args.totp)
+	show_tokens(data)
+
+
+def do_show(args):
+	totp = calc_totp(args.totp)
+	print("{}".format(totp))
+	return totp
+
+
+def parse_files(files):
+	output = []
+	for file in files:
+		with open(file, 'r') as csvfile:
+			reader = csv.DictReader(csvfile, dialect='excel')
+			data = list(reader)
+			output.append(data)
+	return output
+
+
+def parse_params(uname, pw, totp):
+	return [[{'username':uname, 'password':pw, 'totp':totp}]]
 
 
 def show_tokens(input):
 	try:
+		global stdscr
+		stdscr = curses.initscr()
 		curses.noecho()
 		curses.cbreak()
 
@@ -49,24 +97,26 @@ def show_tokens(input):
 		curses.endwin()
 
 
-def print_list(input):
+def print_list(data):
 	line = 0
 
-	for file in input:
-		with open(file, 'r') as list:
-			fieldnames = ['username', 'password', 'totp', 'timer']
-			linereader = csv.DictReader(list, dialect='excel')
+	for file in data:
+		fieldnames = ['username', 'password', 'totp', 'timer']
+		line = print_header(line, fieldnames)
 
-			line = print_header(line, fieldnames)
-
-			for row in linereader:
-				totp = pyotp.TOTP(row['totp'])
-				line = print_row(line, row['username'], row['password'], totp.now(), calc_timer(totp))
+		for row in file:
+			line = print_row(line, row['username'], row['password'], calc_totp(row['totp']), calc_timer(row['totp']))
 
 	stdscr.refresh()
 
 
-def calc_timer(totp):
+def calc_totp(key):
+	totp = pyotp.TOTP(key)
+	return totp.now()
+
+
+def calc_timer(key):
+	totp = pyotp.TOTP(key)
 	time_remaining = int(round(totp.interval - datetime.datetime.now().timestamp() % totp.interval))
 	return time_remaining
 
@@ -88,5 +138,4 @@ def print_line(line):
 
 
 if __name__ == "__main__":
-	stdscr = curses.initscr()
 	main()

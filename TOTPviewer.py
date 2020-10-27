@@ -130,12 +130,12 @@ def print_header(line, fieldnames):
 
 
 def print_row(line, uname, pw, totp, timer):
-	stdscr.addstr(line, 0, "{:<25} | {:<33} | {:^8} | {:^5}".format(uname, pw, totp, timer))
+	stdscr.addstr(line, 0, "{:<30} | {:<30} | {:^8} | {:^3}".format(uname, pw, totp, timer))
 	return line+1
 
 
 def print_line(line):
-	return print_row(line, "-"*25, "-"*33, "-"*8, "-"*5)
+	return print_row(line, "-"*30, "-"*30, "-"*8, "-"*3)
 
 
 if __name__ == "__main__":

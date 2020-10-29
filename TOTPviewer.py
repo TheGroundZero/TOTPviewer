@@ -102,7 +102,7 @@ def print_list(data):
 	line = 0
 
 	for file in data:
-		fieldnames = ['username', 'password', 'totp', 'timer']
+		fieldnames = ['username', 'password', 'totp', 'sec']
 		line = print_header(line, fieldnames)
 
 		for row in file:

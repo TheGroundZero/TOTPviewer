@@ -106,7 +106,9 @@ def print_list(data):
 		line = print_header(line, fieldnames)
 
 		for row in file:
-			line = print_row(line, row['username'], row['password'], calc_totp(row['totp']), calc_timer(row['totp']))
+			totp = calc_totp(row['totp']) if ( row['totp'] and row['totp'] != "") else ""
+			timer = calc_timer(row['totp']) if ( row['totp'] and row['totp'] != "") else ""
+			line = print_row(line, row['username'], row['password'], totp, timer)
 
 	stdscr.refresh()
 
